@@ -14,6 +14,14 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(400), nullable=False)
 
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'name': self.name,
+            'id': self.id,
+        }
+
 # create item table
 class Item(Base):
     __tablename__ = 'item'
@@ -23,6 +31,15 @@ class Item(Base):
     description = Column(String(400))
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'name': self.name,
+            'description': self.description,
+            'id': self.id,
+        }
 
 
 engine = create_engine('sqlite:///catalog.db')
