@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item
-from flask import session as login_session 
-import random, string
+from flask import session as login_session
+import random
+import string
 # important for gconnect
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -14,7 +15,8 @@ import requests
 
 app = Flask(__name__)
 
-engine = create_engine('sqlite:///catalog.db',connect_args={'check_same_thread': False})
+engine = create_engine('sqlite:///catalog.db',
+                       connect_args={'check_same_thread': False})
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -23,8 +25,6 @@ session = DBSession()
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
-
-
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -79,8 +79,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(json.dumps(
+                                'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -105,11 +105,12 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += (' " style = "width: 300px; height: 300px;'
+               'border-radius: 150px;-webkit-border-radius:'
+               '150px;-moz-border-radius: 150px;"> ')
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
-
 
 
 # disconnect from the website.
@@ -117,32 +118,35 @@ def gconnect():
 def gdisconnect():
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
-    print 'User name is: ' 
+    print 'User name is: '
     print login_session['username']
     if access_token is None:
- 	print 'Access Token is None'
-    	response = make_response(json.dumps('Current user not connected.'), 401)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+        print 'Access Token is None'
+        response = make_response(
+                                 json.dumps('Current'
+                                            'user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    url = ('https://accounts.google'
+           '.com/o/oauth2/revoke?token=%s') % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
     print result
     if result['status'] == '200':
-	del login_session['access_token'] 
-    	del login_session['gplus_id']
-    	del login_session['username']
-    	del login_session['email']
-    	del login_session['picture']
-    	response = make_response(json.dumps('Successfully disconnected.'), 200)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        del login_session['access_token']
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
     else:
-	
-    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        response = make_response(json.dumps('Failed to revoke'
+                                            'token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
 
 @app.route('/')
@@ -153,30 +157,34 @@ def catalog():
     login_session['state'] = state
     items = session.query(Item).order_by(desc(Item.id)).limit(2)
     categories = session.query(Category).all()
-    return render_template('main.html', categories = categories , items = items , cat_id = 0)
+    return render_template('main.html',
+                           categories=categories, items=items, cat_id=0)
 
 
 @app.route('/catalog/<int:category_id>/items')
 def category(category_id):
-    cat = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id).all()
     categories = session.query(Category).all()
-    return render_template('main.html', categories = categories , items = items , cat_id = category_id)
+    return render_template('main.html',
+                           categories=categories,
+                           items=items, cat_id=category_id)
 
 
 @app.route('/catalog/<int:item_id>/description')
 def item(item_id):
     items = session.query(Item).filter_by(id=item_id).one()
     category_id = items.category_id
-    return render_template('item.html', items = items, item_id = item_id , category_id = category_id)
+    return render_template('item.html',
+                           items=items, item_id=item_id,
+                           category_id=category_id)
 
 
 # adding new item to the category.
 @app.route('/catalog/<int:category_id>/new', methods=['GET', 'POST'])
 def newItem(category_id):
-    if request.method == 'POST':
-        if 'username' not in login_session:
+    if 'username' not in login_session:
         return redirect('/catalog')
+    if request.method == 'POST':
         newItem = Item(name=request.form['name'], description=request.form[
                            'description'], category_id=category_id)
         session.add(newItem)
@@ -185,10 +193,11 @@ def newItem(category_id):
     else:
         return render_template('newItem.html', category_id=category_id)
 
+
 # editing an existing book in the data_base.
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
            methods=['GET', 'POST'])
-def editItem( category_id, item_id ):
+def editItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/catalog')
     editedItem = session.query(Item).filter_by(id=item_id).one()
@@ -200,7 +209,9 @@ def editItem( category_id, item_id ):
         session.commit()
         return redirect(url_for('category', category_id=category_id))
     else:
-        return render_template('editItem.html', category_id = category_id, id = item_id , item=editedItem)
+        return render_template('editItem.html',
+                               category_id=category_id, id=item_id,
+                               item=editedItem)
 
 
 # DELETE MENU ITEM SOLUTION
@@ -214,10 +225,10 @@ def deleteItem(category_id, item_id):
     session.commit()
     return redirect(url_for('category', category_id=category_id))
 
+
 # return JSON response for a specific category
 @app.route('/catalog/<int:category_id>/JSON')
 def restaurantMenuJSON(category_id):
-    category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(
         category_id=category_id).all()
     return jsonify(CategoryItems=[i.serialize for i in items])
