@@ -6,6 +6,8 @@ My Bookshelf is my personal library of books I read with my own reflections and 
 
 Python 2.7 or hiher: You can download it from the official site - [Python Software Foundation](https://www.python.org)
 
+The site need to be opened at http://localhost:5000/
+
 # Installation 
 
 
@@ -13,13 +15,13 @@ Python 2.7 or hiher: You can download it from the official site - [Python Softwa
 
 2. In the command line move file to directory: ` ~/vagrant `
 
-3. In the command line change to directory: ` ~/vagrant/catalog `
-
 3. Run vagrant virtual machine: ` vagrant up `
 
 4. log in to virtula machine: ` vagrant ssh `
 
-4. Run main.py: ` python application.py `
+5. In the command line change to directory: ` cd ~/vagrant/catalog `
+
+6. Run application.py: ` python application.py `
 
 
 # Built With
