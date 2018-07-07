@@ -23,14 +23,16 @@ class Category(Base):
             'id': self.id,
         }
 
-# create uset table 
+
+# create uset table
 class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250, nullable=False))
     name = Column(String(250), nullable=False)
- 
+
+
 # create item table
 class Item(Base):
     __tablename__ = 'item'
@@ -42,7 +44,7 @@ class Item(Base):
     category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
-    
+
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
