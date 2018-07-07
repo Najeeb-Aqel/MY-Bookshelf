@@ -27,23 +27,22 @@ CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 
 
-# extract use id 
+# extract use id
 def userID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
     except:
-        return 0 
+        return 0
 
 
 # create new user
 def createUser(login_session):
-    user = User(name=login_session['name'], email = login_session['email'])
+    user = User(name=login_session['name'], email=login_session['email'])
     session.add(user)
     session.commit()
     user = session.query(User).filter_by(email=email).one()
     return user.id
-
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -207,11 +206,12 @@ def item(item_id):
 # adding new item to the category.
 @app.route('/catalog/<int:category_id>/new', methods=['GET', 'POST'])
 def newItem(category_id):
-    
+
     if request.method == 'POST':
-        newItem = Item(name=request.form['name'], description=request.form[
-                           'description'], category_id=category_id,
-                           user_id = login_session['user_id'])
+        newItem = Item(name=request.form['name'],
+                       description=request.form['description'],
+                       category_id=category_id,
+                       user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
         return redirect(url_for('category', category_id=category_id))
@@ -223,7 +223,7 @@ def newItem(category_id):
 @app.route('/catalog/<int:category_id>/<int:item_id>/edit',
            methods=['GET', 'POST'])
 def editItem(category_id, item_id):
-    
+
     editedItem = session.query(Item).filter_by(id=item_id).one()
     if login_session['user_id'] != editedItem.user_id:
         return redirect('/catalog')
