@@ -28,6 +28,7 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
+    email = Column(String(250, nullable=False))
     name = Column(String(250), nullable=False)
  
 # create item table
