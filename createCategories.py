@@ -52,6 +52,4 @@ category9 = Category(name="Diaries")
 
 session.add(category9)
 session.commit()
-
-
 print "Categories has been created"
